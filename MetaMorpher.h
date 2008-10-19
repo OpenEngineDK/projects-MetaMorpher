@@ -52,20 +52,15 @@ private:
 	else if (*keyFrame->time < *currentKeyFrame->time)
 	  keyFrame = currentKeyFrame;
       }
-      logger.info << "cKF: " << *currentKeyFrame->time
-		  << " current: "<< *current->time << logger.end;
     }
 
     if (keyFrame == NULL) {
-      logger.info << "keyFrame is NULL" << logger.end;
       return;
     }
 
     float scaling = ((float)(now - *current->time).AsInt32())
       /((float)(*keyFrame->time - *current->time).AsInt32());
 
-
-    logger.info << "scaling: " << scaling << logger.end;
     morpher->Morph(current->obj, keyFrame->obj, scaling);
     current = new KeyFrame(morpher->GetObject(), new Utils::Time(now));
   }

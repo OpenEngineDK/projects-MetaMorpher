@@ -1,7 +1,6 @@
 #ifndef _TRANSFORMATION_NODE_MORPHER_
 #define _TRANSFORMATION_NODE_MORPHER_
 
-#include <Logging/Logger.h>
 #include <Math/Quaternion.h>
 #include <Math/Vector.h>
 #include <Scene/TransformationNode.h>
@@ -25,7 +24,6 @@ class TransformationNodeMorpher : public IMorpher<Scene::TransformationNode> {
     Math::Quaternion<float> qTo = right->GetRotation();
 
     Math::Vector<3,float> position = vFrom + (vTo-vFrom)*scaling;
-    logger.info << "new pos: " << position << logger.end;
     current->SetPosition(position);
     current->SetRotation(Math::Quaternion<float>(qFrom, qTo, scaling));
   }

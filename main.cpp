@@ -263,7 +263,7 @@ void SetupScene(Config& config) {
       new MetaMorpher<TransformationNode>(tmorpher);
     config.engine.ProcessEvent().Attach(*metamorpher);
     metamorpher->Add(left, new Utils::Time(0));
-    metamorpher->Add(right, new Utils::Time(100000000));
+    metamorpher->Add(right, new Utils::Time(20000000));
     
     TransformationNode* trans = metamorpher->GetObject();
     config.scene->AddNode(trans);
