@@ -1,0 +1,32 @@
+# OpenEngine Distribution file for MetaMorpher.
+
+# main repository
+darcs / http://openengine.dk/code/openengine
+darcs-dev / fh.daimi.au.dk:/users/cgd/code/openengine
+
+# MetaMorpher project
+darcs /projects/MetaMorpher http://openengine.dk/code/projects/MetaMorpher
+darcs-dev /projects/MetaMorpher fh.daimi.au.dk:/users/cgd/code/projects/MetaMorpher
+
+# standard set of extensions
+darcs /extensions/SDL             http://openengine.dk/code/extensions/SDL
+darcs /extensions/OpenGLRenderer  http://openengine.dk/code/extensions/OpenGLRenderer
+darcs /extensions/GenericHandlers http://openengine.dk/code/extensions/GenericHandlers
+darcs /extensions/OBJResource     http://openengine.dk/code/extensions/OBJResource
+darcs /extensions/SDLImage     http://openengine.dk/code/extensions/SDLImage
+
+darcs-dev /extensions/SDL             fh.daimi.au.dk:/users/cgd/code/extensions/SDL
+darcs-dev /extensions/OpenGLRenderer  fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
+darcs-dev /extensions/GenericHandlers fh.daimi.au.dk:/users/cgd/code/extensions/GenericHandlers
+darcs-dev /extensions/OBJResource     fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
+darcs-dev /extensions/SDLImage     fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
+
+# windows libraries
+win32 /libraries http://openengine.dk/data/libraries/boost-win32.zip
+win32 /libraries http://openengine.dk/data/libraries/glew-win32.zip
+win32 /libraries http://openengine.dk/data/libraries/sdl-win32.zip
+win32 /libraries http://openengine.dk/data/libraries/dlls-win32.zip
+
+# os x libraries
+
+# linux libraries
