@@ -251,19 +251,30 @@ void SetupScene(Config& config) {
     TransformationNode* left = new TransformationNode();
     left->SetPosition(Vector<3,float>(-10,0,0));
 
+    TransformationNode* topCenter = new TransformationNode();
+    topCenter->SetPosition(Vector<3,float>(0,7,0));
+    //topCenter->SetRotation(Quaternion<float>(Math::PI/2,0,Math::PI/2));
+
     TransformationNode* right = new TransformationNode();
     right->SetPosition(Vector<3,float>(10,0,0));
-    right->SetRotation(Quaternion<float>(Math::PI/2,0,Math::PI/2));
+    //right->SetRotation(Quaternion<float>(Math::PI,0,Math::PI));
 
+    TransformationNode* bottomCenter = new TransformationNode();
+    bottomCenter->SetPosition(Vector<3,float>(0,-7,0));
+    //bottomCenter->SetRotation(Quaternion<float>(Math::PI/2,0,Math::PI/2));
 
     TransformationNodeMorpher* tmorpher =
       new TransformationNodeMorpher();
     
     MetaMorpher<TransformationNode>* metamorpher =
-      new MetaMorpher<TransformationNode>(tmorpher);
+      new MetaMorpher<TransformationNode>
+      (tmorpher,LOOP);
     config.engine.ProcessEvent().Attach(*metamorpher);
     metamorpher->Add(left, new Utils::Time(0));
-    metamorpher->Add(right, new Utils::Time(20000000));
+    metamorpher->Add(topCenter, new Utils::Time(3000000));
+    metamorpher->Add(right, new Utils::Time(6000000));
+    metamorpher->Add(bottomCenter, new Utils::Time(9000000));
+    metamorpher->Add(left, new Utils::Time(12000000));
     
     TransformationNode* trans = metamorpher->GetObject();
     config.scene->AddNode(trans);
