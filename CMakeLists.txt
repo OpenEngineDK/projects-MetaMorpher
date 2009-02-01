@@ -31,6 +31,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   OpenEngine_Utils
   # Extension dependencies
   Extensions_GenericHandlers
+  Extensions_OpenGLRenderer
   Extensions_OBJResource
   Extensions_SDLImage
   Extensions_SDL

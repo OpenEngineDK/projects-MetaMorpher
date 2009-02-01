@@ -7,6 +7,7 @@ class IMorpher {
   /** scaling between 0 and 1 */
   virtual void Morph(T* from, T* to, float scaling) = 0;
   virtual T* GetObject() = 0;
+  virtual ~IMorpher() {}
 };
 
 #endif // _MORPHER_INTERFACE_

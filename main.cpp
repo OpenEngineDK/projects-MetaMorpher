@@ -23,8 +23,6 @@
 #include <Display/SDLFrame.h>
 #include <Devices/SDLInput.h>
 
-// Rendering structures
-#include <Renderers/IRenderNode.h>
 // OpenGL rendering implementation
 #include <Renderers/OpenGL/LightRenderer.h>
 #include <Renderers/OpenGL/Renderer.h>
@@ -201,7 +199,7 @@ void SetupRendering(Config& config) {
         throw Exception("Setup renderer dependencies are not satisfied.");
 
     // Create a renderer
-    config.renderer = new Renderer();
+    config.renderer = new Renderer(config.viewport);
 
     // Setup a rendering view
     RenderingView* rv = new RenderingView(*config.viewport);
@@ -213,7 +211,7 @@ void SetupRendering(Config& config) {
     config.renderer->PreProcessEvent().Attach(*config.textureLoader);
 
     config.renderer->PreProcessEvent()
-      .Attach( *(new LightRenderer()) );
+      .Attach( *(new LightRenderer(*config.camera)) );
 
     config.engine.InitializeEvent().Attach(*config.renderer);
     config.engine.ProcessEvent().Attach(*config.renderer);
