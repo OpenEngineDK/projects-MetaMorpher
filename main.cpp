@@ -20,12 +20,14 @@
 #include <Display/InterpolatedViewingVolume.h>
 #include <Display/ViewingVolume.h>
 // SDL implementation
+#include <Display/HUD.h>
 #include <Display/SDLFrame.h>
 #include <Devices/SDLInput.h>
 
 // OpenGL rendering implementation
 #include <Renderers/OpenGL/LightRenderer.h>
 #include <Renderers/OpenGL/Renderer.h>
+#include <Renderers/OpenGL/BufferedRenderer.h>
 #include <Renderers/OpenGL/RenderingView.h>
 #include <Renderers/TextureLoader.h>
 
@@ -53,6 +55,7 @@
 // OERacer utility files
 #include <Utils/QuitHandler.h>
 
+#include <Utils/Billboard.h>
 
 #include "MetaMorpher.h"
 #include "TransformationNodeMorpher.h"
@@ -198,24 +201,70 @@ void SetupRendering(Config& config) {
         config.camera == NULL )
         throw Exception("Setup renderer dependencies are not satisfied.");
 
-    // Create a renderer
-    config.renderer = new Renderer(config.viewport);
+    BufferedRenderer* textureRenderer = new BufferedRenderer(config.viewport);
+    textureRenderer->SetBackgroundColor(Vector<4,float>(0,0,0,1));
+    ITextureResourcePtr skinTexture = textureRenderer->GetColorBuffer();
 
-    // Setup a rendering view
+    // Create a renderer, thats renderers the texture for the quad
+    BufferedRenderer* sceneRenderer = new BufferedRenderer(config.viewport);
+    sceneRenderer->SetBackgroundColor(Vector<4,float>(1,0,0,1));
+
+    ISceneNode* scene = new RenderStateNode();
+
+    // create and setup the quad bill board
+    ITextureResourcePtr sceneTexture = sceneRenderer->GetColorBuffer();
+    TransformationNode* board = Billboard::
+        CreateTextureBillboard( skinTexture, 0.025 );
+    board->Move(-10,-10,-20);
+    board->Rotate(0,Math::PI/8,0);
+    scene->AddNode(board);
+
+    TransformationNode* mirror = Billboard::
+        CreateTextureBillboard( sceneTexture, 0.025 );
+    mirror->Move(10,-10,-20);
+    mirror->Rotate(0,-Math::PI/8,0);
+    scene->AddNode(mirror);
+
+    // setup top renderer, which renderers the scene
+    config.renderer = textureRenderer; // for the setupScene to set scene
+    sceneRenderer->SetSceneRoot(scene);
+
+    // Setup a rendering view for both renderers
+    // this only holds perspective
     RenderingView* rv = new RenderingView(*config.viewport);
-    config.renderer->ProcessEvent().Attach(*rv);
-    rv->SetBackgroundColor(Vector<4,float>(0,0,0,1));
+    textureRenderer->ProcessEvent().Attach(*rv);
+    sceneRenderer->ProcessEvent().Attach(*rv);
 
     // Add rendering initialization tasks
-    config.textureLoader = new TextureLoader(*config.renderer);
-    config.renderer->PreProcessEvent().Attach(*config.textureLoader);
+    config.textureLoader = new TextureLoader(*textureRenderer);
+    textureRenderer->PreProcessEvent().Attach(*config.textureLoader);
 
-    config.renderer->PreProcessEvent()
+    textureRenderer->PreProcessEvent()
       .Attach( *(new LightRenderer(*config.camera)) );
 
-    config.engine.InitializeEvent().Attach(*config.renderer);
-    config.engine.ProcessEvent().Attach(*config.renderer);
-    config.engine.DeinitializeEvent().Attach(*config.renderer);
+    // needs to be first for the mirror effect to work
+    config.engine.InitializeEvent().Attach(*textureRenderer);
+    config.engine.ProcessEvent().Attach(*textureRenderer);
+    config.engine.DeinitializeEvent().Attach(*textureRenderer);
+
+    config.engine.InitializeEvent().Attach(*sceneRenderer);
+    config.engine.ProcessEvent().Attach(*sceneRenderer);
+    config.engine.DeinitializeEvent().Attach(*sceneRenderer);
+
+    Renderer* hudRenderer = new Renderer(config.viewport);
+    hudRenderer->SetBackgroundColor(Vector<4,float>(0,1,0,1));
+    hudRenderer->SetSceneRoot(new SceneNode());
+
+    // to apply top renderer
+    HUD* hud = new HUD();
+    hudRenderer->PostProcessEvent().Attach( *hud );
+    HUD::Surface* surface = hud->CreateSurface(sceneTexture);
+    surface->SetPosition(HUD::Surface::RIGHT, HUD::Surface::TOP);
+
+    config.engine.InitializeEvent().Attach(*hudRenderer);
+    config.engine.ProcessEvent().Attach(*hudRenderer);
+    config.engine.DeinitializeEvent().Attach(*hudRenderer);
+    hudRenderer->ProcessEvent().Attach(*rv);
 }
 
 void SetupScene(Config& config) {

@@ -35,4 +35,5 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   Extensions_OBJResource
   Extensions_SDLImage
   Extensions_SDL
+  Extensions_HUD
 )
