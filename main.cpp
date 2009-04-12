@@ -27,7 +27,7 @@
 // OpenGL rendering implementation
 #include <Renderers/OpenGL/LightRenderer.h>
 #include <Renderers/OpenGL/Renderer.h>
-#include <Renderers/OpenGL/BufferedRenderer.h>
+#include <Renderers/OpenGL/FBOBufferedRenderer.h>
 #include <Renderers/OpenGL/RenderingView.h>
 #include <Renderers/TextureLoader.h>
 
@@ -201,12 +201,12 @@ void SetupRendering(Config& config) {
         config.camera == NULL )
         throw Exception("Setup renderer dependencies are not satisfied.");
 
-    BufferedRenderer* textureRenderer = new BufferedRenderer(config.viewport);
+    FBOBufferedRenderer* textureRenderer = new FBOBufferedRenderer(config.viewport);
     textureRenderer->SetBackgroundColor(Vector<4,float>(0,0,0,1));
     ITextureResourcePtr skinTexture = textureRenderer->GetColorBuffer();
 
     // Create a renderer, thats renderers the texture for the quad
-    BufferedRenderer* sceneRenderer = new BufferedRenderer(config.viewport);
+    FBOBufferedRenderer* sceneRenderer = new FBOBufferedRenderer(config.viewport);
     sceneRenderer->SetBackgroundColor(Vector<4,float>(1,0,0,1));
 
     ISceneNode* scene = new RenderStateNode();
