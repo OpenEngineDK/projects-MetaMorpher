@@ -28,6 +28,7 @@
 #include <Renderers/OpenGL/LightRenderer.h>
 #include <Renderers/OpenGL/Renderer.h>
 #include <Renderers/OpenGL/FBOBufferedRenderer.h>
+#include <Renderers/OpenGL/GLCopyBufferedRenderer.h>
 #include <Renderers/OpenGL/RenderingView.h>
 #include <Renderers/TextureLoader.h>
 
@@ -195,18 +196,23 @@ void SetupDevices(Config& config) {
     config.engine.DeinitializeEvent().Attach(*input);
 }
 
+IBufferedRenderer* CreateBufferedRenderer(Display::Viewport* vp) {
+    return new GLCopyBufferedRenderer(vp);
+    //return new FBOBufferedRenderer(vp);
+}
+
 void SetupRendering(Config& config) {
     if (config.viewport == NULL ||
         config.renderer != NULL ||
         config.camera == NULL )
         throw Exception("Setup renderer dependencies are not satisfied.");
 
-    FBOBufferedRenderer* textureRenderer = new FBOBufferedRenderer(config.viewport);
+    IBufferedRenderer* textureRenderer = CreateBufferedRenderer(config.viewport);
     textureRenderer->SetBackgroundColor(Vector<4,float>(0,0,0,1));
     ITextureResourcePtr skinTexture = textureRenderer->GetColorBuffer();
 
     // Create a renderer, thats renderers the texture for the quad
-    FBOBufferedRenderer* sceneRenderer = new FBOBufferedRenderer(config.viewport);
+    IBufferedRenderer* sceneRenderer = CreateBufferedRenderer(config.viewport);
     sceneRenderer->SetBackgroundColor(Vector<4,float>(1,0,0,1));
 
     ISceneNode* scene = new RenderStateNode();
