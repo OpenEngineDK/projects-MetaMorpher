@@ -16,6 +16,7 @@ darcs /extensions/OBJResource     http://openengine.dk/code/extensions/OBJResour
 darcs /extensions/SDLImage        http://openengine.dk/code/extensions/SDLImage
 darcs /extensions/HUD             http://openengine.dk/code/extensions/HUD
 darcs /extensions/FFMPEGResource  http://openengine.dk/code/extensions/FFMPEGResource
+darcs /extensions/Morphing        http://openengine.dk/code/extensions/Morphing
 
 darcs-dev /extensions/SDL             fh.daimi.au.dk:/users/cgd/code/extensions/SDL
 darcs-dev /extensions/OpenGLRenderer  fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
@@ -24,6 +25,7 @@ darcs-dev /extensions/OBJResource     fh.daimi.au.dk:/users/cgd/code/extensions/
 darcs-dev /extensions/SDLImage        fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
 darcs-dev /extensions/HUD             fh.daimi.au.dk:/users/cgd/code/extensions/HUD
 darcs-dev /extensions/FFMPEGResource  fh.daimi.au.dk:/users/cgd/code/extensions/FFMPEGResource
+darcs-dev /extensions/Morphing        fh.daimi.au.dk:/users/cgd/code/extensions/Morphing
 
 # windows libraries
 win32 /libraries http://openengine.dk/data/libraries/boost-win32.zip
