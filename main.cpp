@@ -38,7 +38,7 @@
 #include <Resources/DirectoryManager.h>
 #include <Resources/ResourceManager.h>
 // OBJ and TGA plugins
-#include <Resources/ITextureResource.h>
+#include <Resources/ITexture2D.h>
 #include <Resources/SDLImage.h>
 #include <Resources/OBJResource.h>
 
@@ -247,7 +247,7 @@ void SetupRendering(Config& config) {
     textureRenderer->PreProcessEvent().Attach(*config.textureLoader);
 
     textureRenderer->PreProcessEvent()
-      .Attach( *(new LightRenderer(*config.camera)) );
+      .Attach( *(new LightRenderer(*config.viewport)) );
 
     // needs to be first for the mirror effect to work
     config.engine.InitializeEvent().Attach(*textureRenderer);

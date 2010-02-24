@@ -8,6 +8,9 @@ darcs-dev / fh.daimi.au.dk:/users/cgd/code/openengine
 darcs /projects/MetaMorpher http://openengine.dk/code/projects/MetaMorpher
 darcs-dev /projects/MetaMorpher fh.daimi.au.dk:/users/cgd/code/projects/MetaMorpher
 
+# dist files
+dist /extensions/HUD/HUD.dist    http://openengine.dk/code/extensions/HUD/HUD.dist
+
 # standard set of extensions
 darcs /extensions/SDL             http://openengine.dk/code/extensions/SDL
 darcs /extensions/OpenGLRenderer  http://openengine.dk/code/extensions/OpenGLRenderer
