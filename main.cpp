@@ -58,8 +58,8 @@
 
 #include <Utils/Billboard.h>
 
-#include <Animation/MetaMorpher.h>
-#include <Animation/TransformationNodeMorpher.h>
+#include <Animations/MetaMorpher.h>
+#include <Animations/TransformationNodeMorpher.h>
 
 // Additional namespaces
 using namespace OpenEngine;
