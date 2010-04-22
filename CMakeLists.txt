@@ -6,6 +6,7 @@ SET( PROJECT_NAME "MetaMorpher")
 SET( PROJECT_SOURCES
   # Add all the cpp source files here
   main.cpp
+  KeyHandler.cpp
 )
 
 # Include needed to use SDL under Mac OS X
@@ -34,6 +35,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   Extensions_OpenGLRenderer
   Extensions_OBJResource
   Extensions_SDLImage
-  Extensions_SDL
+#  Extensions_SDL
+  Extensions_GLUT
   Extensions_HUD
 )

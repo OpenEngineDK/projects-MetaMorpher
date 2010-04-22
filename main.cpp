@@ -8,10 +8,11 @@
 //--------------------------------------------------------------------
 
 // OpenEngine stuff
-#include <Meta/Config.h>
+//#include <Meta/Config.h>
 
 // Core structures
 #include <Core/Engine.h>
+#include <Core/GLUTEngine.h>
 
 // Display structures
 #include <Display/IFrame.h>
@@ -19,18 +20,26 @@
 #include <Display/Frustum.h>
 #include <Display/InterpolatedViewingVolume.h>
 #include <Display/ViewingVolume.h>
-// SDL implementation
+#include <Display/IEnvironment.h>
 #include <Display/HUD.h>
-#include <Display/SDLFrame.h>
-#include <Devices/SDLInput.h>
+
+// SDL implementation
+// #include <Display/SDLFrame.h>
+// #include <Devices/SDLInput.h>
+
+// GLUT implementation
+#include <Display/GLUTEnvironment.h>
 
 // OpenGL rendering implementation
 #include <Renderers/OpenGL/LightRenderer.h>
 #include <Renderers/OpenGL/Renderer.h>
-#include <Renderers/OpenGL/FBOBufferedRenderer.h>
-#include <Renderers/OpenGL/GLCopyBufferedRenderer.h>
+// #include <Renderers/OpenGL/FBOBufferedRenderer.h>
+// #include <Renderers/OpenGL/GLCopyBufferedRenderer.h>
 #include <Renderers/OpenGL/RenderingView.h>
 #include <Renderers/TextureLoader.h>
+#include <Display/OpenGL/TextureCanvas.h>
+#include <Renderers/OpenGL/CompositeCanvas.h>
+#include <Renderers/OpenGL/ColorStereoRenderer.h>
 
 // Resources
 #include <Resources/IModelResource.h>
@@ -61,6 +70,8 @@
 #include <Animations/MetaMorpher.h>
 #include <Animations/TransformationNodeMorpher.h>
 
+#include "KeyHandler.h"
+
 // Additional namespaces
 using namespace OpenEngine;
 using namespace OpenEngine::Animation;
@@ -69,6 +80,7 @@ using namespace OpenEngine::Logging;
 using namespace OpenEngine::Devices;
 using namespace OpenEngine::Display;
 using namespace OpenEngine::Renderers::OpenGL;
+using namespace OpenEngine::Display::OpenGL;
 using namespace OpenEngine::Renderers;
 using namespace OpenEngine::Resources;
 using namespace OpenEngine::Utils;
@@ -76,8 +88,8 @@ using namespace OpenEngine::Utils;
 // Configuration structure to pass around to the setup methods
 struct Config {
     IEngine&              engine;
-    IFrame*               frame;
-    Viewport*             viewport;
+    IFrame&               frame;
+    CompositeCanvas*      split;
     IViewingVolume*       viewingvolume;
     FollowCamera*         camera;
     Frustum*              frustum;
@@ -86,10 +98,11 @@ struct Config {
     IKeyboard*            keyboard;
     ISceneNode*           scene;
     TextureLoader*        textureLoader;
-    Config(IEngine& engine)
+    IEnvironment*         env;
+    Config(IEngine& engine, IEnvironment* env, IFrame& frame)
         : engine(engine)
-        , frame(NULL)
-        , viewport(NULL)
+        , frame(frame)
+        , split(NULL)
         , viewingvolume(NULL)
         , camera(NULL)
         , frustum(NULL)
@@ -98,6 +111,7 @@ struct Config {
         , keyboard(NULL)
         , scene(NULL)
         , textureLoader(NULL)
+        , env(env)
     {}
 };
 
@@ -116,9 +130,10 @@ int main(int argc, char** argv) {
     Logger::AddLogger(new StreamLogger(&std::cout));
 
     // Create an engine and config object
-    Engine* engine = new Engine();
-    Config config(*engine);
-
+    IEngine* engine = new GLUTEngine();
+    IEnvironment* env = new GLUTEnvironment(800, 600, 16);//FRAME_FULLSCREEN);
+    Config config(*engine, env, env->CreateFrame());
+    
     // Setup the engine
     SetupResources(config);
     SetupDisplay(config);
@@ -128,6 +143,8 @@ int main(int argc, char** argv) {
 
     // Possibly add some debugging stuff
     SetupDebugging(config);
+
+    logger.info << "main scene: " << config.frame.GetScene() << logger.end;
 
     // Start up the engine.
     engine->Start();
@@ -154,28 +171,22 @@ void SetupResources(Config& config) {
 }
 
 void SetupDisplay(Config& config) {
-    if (config.frame         != NULL ||
-        config.viewingvolume != NULL ||
+    if (config.viewingvolume != NULL ||
         config.camera        != NULL ||
-        config.frustum       != NULL ||
-        config.viewport      != NULL)
+        config.frustum       != NULL //||
+        )
         throw Exception("Setup display dependencies are not satisfied.");
 
-    //config.frame         = new SDLFrame(1440, 900, 32, FRAME_FULLSCREEN);
-    config.frame         = new SDLFrame(800, 600, 32);
+    config.engine.InitializeEvent().Attach(*config.env);
+    config.engine.ProcessEvent().Attach(*config.env);
+    config.engine.DeinitializeEvent().Attach(*config.env);
+    
     config.viewingvolume = new InterpolatedViewingVolume(*(new ViewingVolume()));
     config.camera        = new FollowCamera( *config.viewingvolume );
-    //config.frustum       = new Frustum(*config.camera, 20, 3000);
 
     config.camera->SetPosition(Vector<3,float>(0,0,20));
     config.camera->LookAt(Vector<3,float>(0,0,0));
 
-    config.viewport      = new Viewport(*config.frame);
-    config.viewport->SetViewingVolume(config.camera);
-
-    config.engine.InitializeEvent().Attach(*config.frame);
-    config.engine.ProcessEvent().Attach(*config.frame);
-    config.engine.DeinitializeEvent().Attach(*config.frame);
 }
 
 void SetupDevices(Config& config) {
@@ -183,43 +194,46 @@ void SetupDevices(Config& config) {
         config.mouse    != NULL)
         throw Exception("Setup devices dependencies are not satisfied.");
     // Create the mouse and keyboard input modules
-    SDLInput* input = new SDLInput();
-    config.keyboard = input;
-    config.mouse = input;
+    config.keyboard = config.env->GetKeyboard();
+    config.mouse = config.env->GetMouse();
 
     // Bind the quit handler
     QuitHandler* quit_h = new QuitHandler(config.engine);
     config.keyboard->KeyEvent().Attach(*quit_h);
 
-    // Bind to the engine for processing time
-    config.engine.InitializeEvent().Attach(*input);
-    config.engine.ProcessEvent().Attach(*input);
-    config.engine.DeinitializeEvent().Attach(*input);
-}
-
-IBufferedRenderer* CreateBufferedRenderer(Display::Viewport* vp) {
-    return new GLCopyBufferedRenderer(vp);
-    //return new FBOBufferedRenderer(vp);
+    config.split = new CompositeCanvas();
+    KeyHandler* kh = new KeyHandler(config.frame, *config.split);
+    config.keyboard->KeyEvent().Attach(*kh);
 }
 
 void SetupRendering(Config& config) {
-    if (config.viewport == NULL ||
-        config.renderer != NULL ||
+    if (config.renderer != NULL ||
         config.camera == NULL )
         throw Exception("Setup renderer dependencies are not satisfied.");
 
-    IBufferedRenderer* textureRenderer = CreateBufferedRenderer(config.viewport);
-    textureRenderer->SetBackgroundColor(Vector<4,float>(0,0,0,1));
-    ITextureResourcePtr skinTexture = textureRenderer->GetColorBuffer();
-
-    // Create a renderer, thats renderers the texture for the quad
-    IBufferedRenderer* sceneRenderer = CreateBufferedRenderer(config.viewport);
-    sceneRenderer->SetBackgroundColor(Vector<4,float>(1,0,0,1));
+    RenderStateNode* renderStateNode = new RenderStateNode();
+    renderStateNode->DisableOption(RenderStateNode::LIGHTING);
+    config.scene = renderStateNode;
 
     ISceneNode* scene = new RenderStateNode();
 
-    // create and setup the quad bill board
-    ITextureResourcePtr sceneTexture = sceneRenderer->GetColorBuffer();
+    // config.frame.Attach(*config.split);
+    config.frame.SetViewingVolume(config.camera);
+
+    IRenderer* textureRenderer = new Renderer();
+    textureRenderer->SetBackgroundColor(Vector<4,float>(0.4,0,0.4,1));
+    TextureCanvas* skinTextureFrame = new TextureCanvas(config.frame);
+    ITexture2DPtr skinTexture = skinTextureFrame->GetTexture();
+    skinTextureFrame->SetScene(config.scene);
+    skinTextureFrame->SetViewingVolume(config.camera);
+
+    IRenderer* sceneRenderer = new Renderer();
+    TextureCanvas* sceneTextureFrame = new TextureCanvas(config.frame);
+    ITexture2DPtr sceneTexture = sceneTextureFrame->GetTexture();
+    sceneRenderer->SetBackgroundColor(Vector<4,float>(0.2,0.2,0.2,1));
+    sceneTextureFrame->SetScene(scene);
+    sceneTextureFrame->SetViewingVolume(config.camera);
+    
     TransformationNode* board = Billboard::
         CreateTextureBillboard( skinTexture, 0.025 );
     board->Move(-10,-10,-20);
@@ -233,62 +247,63 @@ void SetupRendering(Config& config) {
     scene->AddNode(mirror);
 
     // setup top renderer, which renderers the scene
-    config.renderer = textureRenderer; // for the setupScene to set scene
-    sceneRenderer->SetSceneRoot(scene);
-
+    config.renderer = sceneRenderer; // for the setupScene to set scene
     // Setup a rendering view for both renderers
-    // this only holds perspective
-    RenderingView* rv = new RenderingView(*config.viewport);
+    RenderingView* rv = new RenderingView();
     textureRenderer->ProcessEvent().Attach(*rv);
     sceneRenderer->ProcessEvent().Attach(*rv);
 
     // Add rendering initialization tasks
     config.textureLoader = new TextureLoader(*textureRenderer);
     textureRenderer->PreProcessEvent().Attach(*config.textureLoader);
-
     textureRenderer->PreProcessEvent()
-      .Attach( *(new LightRenderer(*config.viewport)) );
+        .Attach( *(new LightRenderer()) );
+ 
 
-    // needs to be first for the mirror effect to work
-    config.engine.InitializeEvent().Attach(*textureRenderer);
-    config.engine.ProcessEvent().Attach(*textureRenderer);
-    config.engine.DeinitializeEvent().Attach(*textureRenderer);
+    ColorStereoRenderer* stereo = new ColorStereoRenderer();
 
-    config.engine.InitializeEvent().Attach(*sceneRenderer);
-    config.engine.ProcessEvent().Attach(*sceneRenderer);
-    config.engine.DeinitializeEvent().Attach(*sceneRenderer);
+    // and all the wiring ...
+    config.frame.InitializeEvent().Attach(*textureRenderer);
+    config.frame.DeinitializeEvent().Attach(*textureRenderer);
+    config.frame.InitializeEvent().Attach(*sceneRenderer);
+    config.frame.DeinitializeEvent().Attach(*sceneRenderer);
+    config.frame.InitializeEvent().Attach(*skinTextureFrame);
+    config.frame.DeinitializeEvent().Attach(*skinTextureFrame);
+    config.frame.InitializeEvent().Attach(*sceneTextureFrame);
+    config.frame.DeinitializeEvent().Attach(*sceneTextureFrame);
+    config.frame.InitializeEvent().Attach(*stereo);
+    config.frame.DeinitializeEvent().Attach(*stereo);
 
-    Renderer* hudRenderer = new Renderer(config.viewport);
-    hudRenderer->SetBackgroundColor(Vector<4,float>(0,1,0,1));
-    hudRenderer->SetSceneRoot(new SceneNode());
-
-    // to apply top renderer
-    HUD* hud = new HUD();
-    hudRenderer->PostProcessEvent().Attach( *hud );
-    HUD::Surface* surface = hud->CreateSurface(sceneTexture);
-    surface->SetPosition(HUD::Surface::RIGHT, HUD::Surface::TOP);
-
-    config.engine.InitializeEvent().Attach(*hudRenderer);
-    config.engine.ProcessEvent().Attach(*hudRenderer);
-    config.engine.DeinitializeEvent().Attach(*hudRenderer);
-    hudRenderer->ProcessEvent().Attach(*rv);
+    config.frame.RedrawEvent().Attach(*skinTextureFrame);
+    config.frame.RedrawEvent().Attach(*sceneTextureFrame);
+    skinTextureFrame->RedrawEvent().Attach(*textureRenderer);
+    sceneTextureFrame->RedrawEvent().Attach(*stereo);
+    // sceneTextureFrame->RedrawEvent().Attach(*sceneRenderer);
+    stereo->RedrawEvent().Attach(*sceneRenderer);
+    // TextureCanvas* topFrame = sceneTextureFrame;
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
+    // config.split->AddCanvas(topFrame);
 }
 
 void SetupScene(Config& config) {
-    if (config.scene  != NULL ||
+    if (config.scene  == NULL ||
         config.mouse  == NULL ||
         config.keyboard == NULL)
         throw Exception("Setup scene dependencies are not satisfied.");
 
     // Create a root scene node
 
-    RenderStateNode* renderStateNode = new RenderStateNode();
-    renderStateNode->DisableOption(RenderStateNode::LIGHTING);
-    config.scene = renderStateNode;
 
     // Supply the scene to the renderer
-    config.renderer->SetSceneRoot(config.scene);
-
+    // config.renderer->SetSceneRoot(config.scene);
+    
     //todo
     
 
