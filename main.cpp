@@ -21,7 +21,6 @@
 #include <Display/InterpolatedViewingVolume.h>
 #include <Display/ViewingVolume.h>
 #include <Display/IEnvironment.h>
-#include <Display/HUD.h>
 
 // SDL implementation
 // #include <Display/SDLFrame.h>

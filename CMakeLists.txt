@@ -37,5 +37,4 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   Extensions_SDLImage
 #  Extensions_SDL
   Extensions_GLUT
-  Extensions_HUD
 )
