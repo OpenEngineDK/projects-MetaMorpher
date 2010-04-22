@@ -220,8 +220,8 @@ void SetupRendering(Config& config) {
     config.frame.SetViewingVolume(config.camera);
 
     IRenderer* textureRenderer = new Renderer();
-    textureRenderer->SetBackgroundColor(Vector<4,float>(0.4,0,0.4,1));
     TextureCanvas* skinTextureFrame = new TextureCanvas(config.frame);
+    skinTextureFrame->SetBackgroundColor(Vector<4,float>(0.4,0,0.4,1));
     ITexture2DPtr skinTexture = skinTextureFrame->GetTexture();
     skinTextureFrame->SetScene(config.scene);
     skinTextureFrame->SetViewingVolume(config.camera);
@@ -229,7 +229,7 @@ void SetupRendering(Config& config) {
     IRenderer* sceneRenderer = new Renderer();
     TextureCanvas* sceneTextureFrame = new TextureCanvas(config.frame);
     ITexture2DPtr sceneTexture = sceneTextureFrame->GetTexture();
-    sceneRenderer->SetBackgroundColor(Vector<4,float>(0.2,0.2,0.2,1));
+    sceneTextureFrame->SetBackgroundColor(Vector<4,float>(0.2,0.2,0.2,1));
     sceneTextureFrame->SetScene(scene);
     sceneTextureFrame->SetViewingVolume(config.camera);
     
@@ -276,9 +276,11 @@ void SetupRendering(Config& config) {
     config.frame.RedrawEvent().Attach(*skinTextureFrame);
     config.frame.RedrawEvent().Attach(*sceneTextureFrame);
     skinTextureFrame->RedrawEvent().Attach(*textureRenderer);
-    sceneTextureFrame->RedrawEvent().Attach(*stereo);
-    // sceneTextureFrame->RedrawEvent().Attach(*sceneRenderer);
     stereo->RedrawEvent().Attach(*sceneRenderer);
+    
+    sceneTextureFrame->RedrawEvent().Attach(*stereo);
+    //sceneTextureFrame->RedrawEvent().Attach(*sceneRenderer);
+    
     // TextureCanvas* topFrame = sceneTextureFrame;
     // config.split->AddCanvas(topFrame);
     // config.split->AddCanvas(topFrame);
