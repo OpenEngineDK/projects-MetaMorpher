@@ -15,20 +15,20 @@
 #include <Core/IListener.h>
 #include <Display/IFrame.h>
 #include <Devices/IKeyboard.h>
-#include <Renderers/OpenGL/CompositeCanvas.h>
+//#include <Renderers/OpenGL/CompositeCanvas.h>
 
 
 using namespace OpenEngine::Display;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Devices;
-using namespace OpenEngine::Renderers::OpenGL;
+//using namespace OpenEngine::Renderers::OpenGL;
 
 class KeyHandler : public IListener<KeyboardEventArg> {
 private:
     IFrame& frame;
-    CompositeCanvas& split;
+    //CompositeCanvas& split;
 public:
-    KeyHandler(IFrame& frame, CompositeCanvas& split);
+    KeyHandler(IFrame& frame/*, CompositeCanvas& split*/);
     virtual ~KeyHandler();
 
     void Handle(KeyboardEventArg arg);

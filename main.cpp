@@ -36,9 +36,10 @@
 // #include <Renderers/OpenGL/GLCopyBufferedRenderer.h>
 #include <Renderers/OpenGL/RenderingView.h>
 #include <Renderers/TextureLoader.h>
-#include <Display/OpenGL/TextureCanvas.h>
-#include <Renderers/OpenGL/CompositeCanvas.h>
-#include <Renderers/OpenGL/ColorStereoRenderer.h>
+#include <Display/OpenGL/SplitStereoCanvas.h>
+#include <Display/OpenGL/ColorStereoCanvas.h>
+#include <Display/OpenGL/RenderCanvas.h>
+#include <Display/CanvasQueue.h>
 
 // Resources
 #include <Resources/IModelResource.h>
@@ -88,7 +89,7 @@ using namespace OpenEngine::Utils;
 struct Config {
     IEngine&              engine;
     IFrame&               frame;
-    CompositeCanvas*      split;
+    // CompositeCanvas*      split;
     IViewingVolume*       viewingvolume;
     FollowCamera*         camera;
     Frustum*              frustum;
@@ -98,10 +99,11 @@ struct Config {
     ISceneNode*           scene;
     TextureLoader*        textureLoader;
     IEnvironment*         env;
+    IRenderCanvas*        canvas;
     Config(IEngine& engine, IEnvironment* env, IFrame& frame)
         : engine(engine)
         , frame(frame)
-        , split(NULL)
+        // , split(NULL)
         , viewingvolume(NULL)
         , camera(NULL)
         , frustum(NULL)
@@ -111,6 +113,7 @@ struct Config {
         , scene(NULL)
         , textureLoader(NULL)
         , env(env)
+        , canvas(NULL)
     {}
 };
 
@@ -142,8 +145,6 @@ int main(int argc, char** argv) {
 
     // Possibly add some debugging stuff
     SetupDebugging(config);
-
-    logger.info << "main scene: " << config.frame.GetScene() << logger.end;
 
     // Start up the engine.
     engine->Start();
@@ -200,8 +201,8 @@ void SetupDevices(Config& config) {
     QuitHandler* quit_h = new QuitHandler(config.engine);
     config.keyboard->KeyEvent().Attach(*quit_h);
 
-    config.split = new CompositeCanvas();
-    KeyHandler* kh = new KeyHandler(config.frame, *config.split);
+    // config.split = new CompositeCanvas();
+    KeyHandler* kh = new KeyHandler(config.frame/*, *config.split*/);
     config.keyboard->KeyEvent().Attach(*kh);
 }
 
@@ -216,23 +217,41 @@ void SetupRendering(Config& config) {
 
     ISceneNode* scene = new RenderStateNode();
 
-    // config.frame.Attach(*config.split);
-    config.frame.SetViewingVolume(config.camera);
-
     IRenderer* textureRenderer = new Renderer();
-    TextureCanvas* skinTextureFrame = new TextureCanvas(config.frame);
-    skinTextureFrame->SetBackgroundColor(Vector<4,float>(0.4,0,0.4,1));
+    textureRenderer->SetBackgroundColor(Vector<4,float>(0.4,0,0.4,1));
+    RenderCanvas* skinTextureFrame = new RenderCanvas();
+    skinTextureFrame->SetWidth(800);
+    skinTextureFrame->SetHeight(600);
+    skinTextureFrame->SetRenderer(textureRenderer);
     ITexture2DPtr skinTexture = skinTextureFrame->GetTexture();
     skinTextureFrame->SetScene(config.scene);
     skinTextureFrame->SetViewingVolume(config.camera);
 
     IRenderer* sceneRenderer = new Renderer();
-    TextureCanvas* sceneTextureFrame = new TextureCanvas(config.frame);
-    ITexture2DPtr sceneTexture = sceneTextureFrame->GetTexture();
-    sceneTextureFrame->SetBackgroundColor(Vector<4,float>(0.2,0.2,0.2,1));
-    sceneTextureFrame->SetScene(scene);
-    sceneTextureFrame->SetViewingVolume(config.camera);
-    
+    sceneRenderer->SetBackgroundColor(Vector<4,float>(0.2,0.2,0.2,1));
+    RenderCanvas* sceneTextureFrame = new RenderCanvas();
+
+    ColorStereoCanvas* cstereo = new ColorStereoCanvas();
+    SplitStereoCanvas* sstereo = new SplitStereoCanvas();
+    // select stereo mode or no stereo
+    //config.canvas = sceneTextureFrame;
+    config.canvas = cstereo;
+    //config.canvas = sstereo;
+
+    config.canvas->SetWidth(800);
+    config.canvas->SetHeight(600);
+    config.canvas->SetRenderer(sceneRenderer);
+    ITexture2DPtr sceneTexture = config.canvas->GetTexture();
+    config.canvas->SetScene(scene);
+    config.canvas->SetViewingVolume(config.camera);
+
+
+    CanvasQueue* cq = new CanvasQueue();
+    cq->PushCanvas(config.canvas);
+    cq->PushCanvas(skinTextureFrame);
+
+    config.frame.SetCanvas(cq);
+
     TransformationNode* board = Billboard::
         CreateTextureBillboard( skinTexture, 0.025 );
     board->Move(-10,-10,-20);
@@ -257,40 +276,7 @@ void SetupRendering(Config& config) {
     textureRenderer->PreProcessEvent().Attach(*config.textureLoader);
     textureRenderer->PreProcessEvent()
         .Attach( *(new LightRenderer()) );
- 
-
-    ColorStereoRenderer* stereo = new ColorStereoRenderer();
-
-    // and all the wiring ...
-    config.frame.InitializeEvent().Attach(*textureRenderer);
-    config.frame.DeinitializeEvent().Attach(*textureRenderer);
-    config.frame.InitializeEvent().Attach(*sceneRenderer);
-    config.frame.DeinitializeEvent().Attach(*sceneRenderer);
-    config.frame.InitializeEvent().Attach(*skinTextureFrame);
-    config.frame.DeinitializeEvent().Attach(*skinTextureFrame);
-    config.frame.InitializeEvent().Attach(*sceneTextureFrame);
-    config.frame.DeinitializeEvent().Attach(*sceneTextureFrame);
-    config.frame.InitializeEvent().Attach(*stereo);
-    config.frame.DeinitializeEvent().Attach(*stereo);
-
-    config.frame.RedrawEvent().Attach(*skinTextureFrame);
-    config.frame.RedrawEvent().Attach(*sceneTextureFrame);
-    skinTextureFrame->RedrawEvent().Attach(*textureRenderer);
-    stereo->RedrawEvent().Attach(*sceneRenderer);
     
-    sceneTextureFrame->RedrawEvent().Attach(*stereo);
-    //sceneTextureFrame->RedrawEvent().Attach(*sceneRenderer);
-    
-    // TextureCanvas* topFrame = sceneTextureFrame;
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
-    // config.split->AddCanvas(topFrame);
 }
 
 void SetupScene(Config& config) {
