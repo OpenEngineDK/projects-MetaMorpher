@@ -38,7 +38,10 @@
 #include <Renderers/TextureLoader.h>
 #include <Display/OpenGL/SplitStereoCanvas.h>
 #include <Display/OpenGL/ColorStereoCanvas.h>
+
+#include <Display/OpenGL/SplitScreenCanvas.h>
 #include <Display/OpenGL/RenderCanvas.h>
+#include <Display/OpenGL/TextureCopy.h>
 #include <Display/CanvasQueue.h>
 
 // Resources
@@ -219,7 +222,7 @@ void SetupRendering(Config& config) {
 
     IRenderer* textureRenderer = new Renderer();
     textureRenderer->SetBackgroundColor(Vector<4,float>(0.4,0,0.4,1));
-    RenderCanvas* skinTextureFrame = new RenderCanvas();
+    RenderCanvas<TextureCopy>* skinTextureFrame = new RenderCanvas<TextureCopy>();
     skinTextureFrame->SetWidth(800);
     skinTextureFrame->SetHeight(600);
     skinTextureFrame->SetRenderer(textureRenderer);
@@ -229,13 +232,14 @@ void SetupRendering(Config& config) {
 
     IRenderer* sceneRenderer = new Renderer();
     sceneRenderer->SetBackgroundColor(Vector<4,float>(0.2,0.2,0.2,1));
-    RenderCanvas* sceneTextureFrame = new RenderCanvas();
+    RenderCanvas<TextureCopy>* sceneTextureFrame = new RenderCanvas<TextureCopy>();
 
-    ColorStereoCanvas* cstereo = new ColorStereoCanvas();
-    SplitStereoCanvas* sstereo = new SplitStereoCanvas();
+    ColorStereoCanvas<TextureCopy>* cstereo = new ColorStereoCanvas<TextureCopy>();
+    SplitStereoCanvas<TextureCopy>* sstereo = new SplitStereoCanvas<TextureCopy>();
     // select stereo mode or no stereo
-    //config.canvas = sceneTextureFrame;
-    config.canvas = cstereo;
+    
+    config.canvas = sceneTextureFrame;
+    //config.canvas = cstereo;
     //config.canvas = sstereo;
 
     config.canvas->SetWidth(800);
@@ -245,12 +249,14 @@ void SetupRendering(Config& config) {
     config.canvas->SetScene(scene);
     config.canvas->SetViewingVolume(config.camera);
 
-
     CanvasQueue* cq = new CanvasQueue();
     cq->PushCanvas(config.canvas);
     cq->PushCanvas(skinTextureFrame);
-
     config.frame.SetCanvas(cq);
+
+    // SplitScreenCanvas<TextureCopy>* split = 
+    //     new SplitScreenCanvas<TextureCopy>(*cq, *cq, SplitScreenCanvas<TextureCopy>::VERTICAL, 0.2);
+    // config.frame.SetCanvas(split);
 
     TransformationNode* board = Billboard::
         CreateTextureBillboard( skinTexture, 0.025 );
@@ -276,7 +282,6 @@ void SetupRendering(Config& config) {
     textureRenderer->PreProcessEvent().Attach(*config.textureLoader);
     textureRenderer->PreProcessEvent()
         .Attach( *(new LightRenderer()) );
-    
 }
 
 void SetupScene(Config& config) {

@@ -13,7 +13,8 @@ darcs-dev /projects/MetaMorpher fh.daimi.au.dk:/users/cgd/code/projects/MetaMorp
 
 # standard set of extensions
 darcs /extensions/GLUT            http://openengine.dk/code/extensions/GLUT
-darcs /extensions/OpenGLRenderer  http://openengine.dk/code/extensions/OpenGLRenderer
+#darcs /extensions/OpenGLRenderer  http://openengine.dk/code/extensions/OpenGLRenderer
+darcs /extensions/OpenGLRenderer  http://openengine.dk/code/branches/templatecanvas-OpenGLRenderer
 darcs /extensions/GenericHandlers http://openengine.dk/code/extensions/GenericHandlers
 darcs /extensions/OBJResource     http://openengine.dk/code/extensions/OBJResource
 darcs /extensions/SDLImage        http://openengine.dk/code/extensions/SDLImage
@@ -21,7 +22,8 @@ darcs /extensions/FFMPEGResource  http://openengine.dk/code/extensions/FFMPEGRes
 darcs /extensions/Morphing        http://openengine.dk/code/extensions/Morphing
 
 darcs-dev /extensions/GLUT            fh.daimi.au.dk:/users/cgd/code/extensions/GLUT
-darcs-dev /extensions/OpenGLRenderer  fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
+#darcs-dev /extensions/OpenGLRenderer  fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
+darcs-dev /extensions/OpenGLRenderer  fh.daimi.au.dk:/users/cgd/code/branches/templatecanvas-OpenGLRenderer
 darcs-dev /extensions/GenericHandlers fh.daimi.au.dk:/users/cgd/code/extensions/GenericHandlers
 darcs-dev /extensions/OBJResource     fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
 darcs-dev /extensions/SDLImage        fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
