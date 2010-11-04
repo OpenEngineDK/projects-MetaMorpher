@@ -40,7 +40,7 @@
 #include <Display/OpenGL/ColorStereoCanvas.h>
 
 #include <Display/OpenGL/SplitScreenCanvas.h>
-#include <Display/OpenGL/RenderCanvas.h>
+#include <Display/RenderCanvas.h>
 #include <Display/OpenGL/TextureCopy.h>
 #include <Display/CanvasQueue.h>
 
@@ -222,7 +222,7 @@ void SetupRendering(Config& config) {
 
     IRenderer* textureRenderer = new Renderer();
     textureRenderer->SetBackgroundColor(Vector<4,float>(0.4,0,0.4,1));
-    RenderCanvas<TextureCopy>* skinTextureFrame = new RenderCanvas<TextureCopy>();
+    RenderCanvas* skinTextureFrame = new RenderCanvas(new TextureCopy());
     skinTextureFrame->SetWidth(800);
     skinTextureFrame->SetHeight(600);
     skinTextureFrame->SetRenderer(textureRenderer);
@@ -232,10 +232,10 @@ void SetupRendering(Config& config) {
 
     IRenderer* sceneRenderer = new Renderer();
     sceneRenderer->SetBackgroundColor(Vector<4,float>(0.2,0.2,0.2,1));
-    RenderCanvas<TextureCopy>* sceneTextureFrame = new RenderCanvas<TextureCopy>();
+    RenderCanvas* sceneTextureFrame = new RenderCanvas(new TextureCopy());
 
-    ColorStereoCanvas<TextureCopy>* cstereo = new ColorStereoCanvas<TextureCopy>();
-    SplitStereoCanvas<TextureCopy>* sstereo = new SplitStereoCanvas<TextureCopy>();
+    ColorStereoCanvas* cstereo = new ColorStereoCanvas(new TextureCopy());
+    SplitStereoCanvas* sstereo = new SplitStereoCanvas(new TextureCopy());
     // select stereo mode or no stereo
     
     config.canvas = sceneTextureFrame;
