@@ -1,32 +1,32 @@
 # OpenEngine Distribution file for MetaMorpher.
 
 # main repository
-darcs / http://openengine.dk/code/openengine
-darcs-dev / fh.daimi.au.dk:/users/cgd/code/openengine
+git / https://github.com/OpenEngineDK/openengine.git
+git-dev / git@github.com:OpenEngineDK/openengine.git
 
 # MetaMorpher project
-darcs /projects/MetaMorpher http://openengine.dk/code/projects/MetaMorpher
-darcs-dev /projects/MetaMorpher fh.daimi.au.dk:/users/cgd/code/projects/MetaMorpher
+git /projects/MetaMorpher https://github.com/OpenEngineDK/projects-MetaMorpher.git
+git-dev /projects/MetaMorpher git@github.com:OpenEngineDK/projects-MetaMorpher.git
 
 # dist files
-#dist /extensions/HUD/HUD.dist    http://openengine.dk/code/extensions/HUD/HUD.dist
+#dist /extensions/HUD/HUD.dist    https://raw.githubusercontent.com/OpenEngineDK/extensions-HUD/master/HUD.dist
 
 # standard set of extensions
-darcs /extensions/GLUT            http://openengine.dk/code/extensions/GLUT
-darcs /extensions/OpenGLRenderer  http://openengine.dk/code/extensions/OpenGLRenderer
-darcs /extensions/GenericHandlers http://openengine.dk/code/extensions/GenericHandlers
-darcs /extensions/OBJResource     http://openengine.dk/code/extensions/OBJResource
-darcs /extensions/SDLImage        http://openengine.dk/code/extensions/SDLImage
-darcs /extensions/FFMPEGResource  http://openengine.dk/code/extensions/FFMPEGResource
-darcs /extensions/Morphing        http://openengine.dk/code/extensions/Morphing
+git /extensions/GLUT            https://github.com/OpenEngineDK/extensions-GLUT.git
+git /extensions/OpenGLRenderer  https://github.com/OpenEngineDK/extensions-OpenGLRenderer.git
+git /extensions/GenericHandlers https://github.com/OpenEngineDK/extensions-GenericHandlers.git
+git /extensions/OBJResource     https://github.com/OpenEngineDK/extensions-OBJResource.git
+git /extensions/SDLImage        https://github.com/OpenEngineDK/extensions-SDLImage.git
+git /extensions/FFMPEGResource  https://github.com/OpenEngineDK/extensions-FFMPEGResource.git
+git /extensions/Morphing        https://github.com/OpenEngineDK/extensions-Morphing.git
 
-darcs-dev /extensions/GLUT            fh.daimi.au.dk:/users/cgd/code/extensions/GLUT
-darcs-dev /extensions/OpenGLRenderer  fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
-darcs-dev /extensions/GenericHandlers fh.daimi.au.dk:/users/cgd/code/extensions/GenericHandlers
-darcs-dev /extensions/OBJResource     fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
-darcs-dev /extensions/SDLImage        fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
-darcs-dev /extensions/FFMPEGResource  fh.daimi.au.dk:/users/cgd/code/extensions/FFMPEGResource
-darcs-dev /extensions/Morphing        fh.daimi.au.dk:/users/cgd/code/extensions/Morphing
+git-dev /extensions/GLUT            git@github.com:OpenEngineDK/extensions-GLUT.git
+git-dev /extensions/OpenGLRenderer  git@github.com:OpenEngineDK/extensions-OpenGLRenderer.git
+git-dev /extensions/GenericHandlers git@github.com:OpenEngineDK/extensions-GenericHandlers.git
+git-dev /extensions/OBJResource     git@github.com:OpenEngineDK/extensions-OBJResource.git
+git-dev /extensions/SDLImage        git@github.com:OpenEngineDK/extensions-SDLImage.git
+git-dev /extensions/FFMPEGResource  git@github.com:OpenEngineDK/extensions-FFMPEGResource.git
+git-dev /extensions/Morphing        git@github.com:OpenEngineDK/extensions-Morphing.git
 
 # windows libraries
 win32 /libraries http://openengine.dk/data/libraries/boost-win32.zip
